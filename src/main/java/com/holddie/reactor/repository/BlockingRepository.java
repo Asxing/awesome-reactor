@@ -2,11 +2,11 @@ package com.holddie.reactor.repository;
 
 public interface BlockingRepository<T> {
 
-	void save(T value);
+    void save(T value);
 
-	T findFirst();
+    T findFirst();
 
-	Iterable<T> findAll();
+    Iterable<T> findAll();
 
-	T findById(String id);
+    T findById(String id);
 }
