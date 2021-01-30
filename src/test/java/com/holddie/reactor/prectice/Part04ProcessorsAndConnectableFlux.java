@@ -13,12 +13,11 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CountDownLatch;
 
-/**
- * @author sbalamaci
- */
+/** @author sbalamaci */
 public class Part04ProcessorsAndConnectableFlux implements BaseTestFlux {
 
-    private static final Logger log = LoggerFactory.getLogger(Part04ProcessorsAndConnectableFlux.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(Part04ProcessorsAndConnectableFlux.class);
 
     @Test
     public void directProcessor() {
@@ -41,13 +40,14 @@ public class Part04ProcessorsAndConnectableFlux implements BaseTestFlux {
 
     @Test
     public void simpleSharedFlux() {
-        Flux<Integer> flux = Flux.range(0, 10)
-                .doOnSubscribe((val) -> log.info("Subscribing ..."))
-//                .delayElements(Duration.of(10, ChronoUnit.MILLIS))
-                .share();
+        Flux<Integer> flux =
+                Flux.range(0, 10)
+                        .doOnSubscribe((val) -> log.info("Subscribing ..."))
+                        //                .delayElements(Duration.of(10, ChronoUnit.MILLIS))
+                        .share();
 
-//        Flux<Integer> events = flux
-//                .publishOn(Schedulers.elastic(), 2);
+        //        Flux<Integer> events = flux
+        //                .publishOn(Schedulers.elastic(), 2);
 
         CountDownLatch latch = new CountDownLatch(1);
         flux.subscribe(logNext("1"));
@@ -57,25 +57,20 @@ public class Part04ProcessorsAndConnectableFlux implements BaseTestFlux {
 
     @Test
     public void sharedFlux() {
-        Flux<Integer> flux = Flux.range(0, 200)
-                .delayElements(Duration.of(10, ChronoUnit.MILLIS))
-                .share();
+        Flux<Integer> flux =
+                Flux.range(0, 200).delayElements(Duration.of(10, ChronoUnit.MILLIS)).share();
 
-        Flux<Integer> events = flux
-                .publishOn(Schedulers.elastic(), 2);
+        Flux<Integer> events = flux.publishOn(Schedulers.elastic(), 2);
 
         events.subscribe((val) -> log.info("FAST Subscriber received:{}", val));
 
         CountDownLatch latch = new CountDownLatch(1);
         CountingConsumer<Integer> countingConsumer = new CountingConsumer<>("SLOW Subscriber");
 
-        Flux<Integer> delayedFlux = events.
-                delayElements(Duration.of(100, ChronoUnit.MILLIS));
-        delayedFlux
-                .subscribe(countingConsumer, logErrorConsumer(latch), logCompleteMethod(latch));
+        Flux<Integer> delayedFlux = events.delayElements(Duration.of(100, ChronoUnit.MILLIS));
+        delayedFlux.subscribe(countingConsumer, logErrorConsumer(latch), logCompleteMethod(latch));
 
         Helpers.wait(latch);
         log.info("SlowSubscriber received total={}", countingConsumer.getCount());
     }
-
 }
